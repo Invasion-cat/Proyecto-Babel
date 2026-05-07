@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS client (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <script type="importmap">
   {
     "imports": {
@@ -15,6 +19,7 @@
     }
   }
   </script>
+
   <style>
     :root {
       --paper:#f5f0e6; --paper-dark:#ede7d3;
@@ -33,7 +38,6 @@
     body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:300;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.030;}
     body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at center,transparent 50%,rgba(155,130,80,0.09) 100%);}
 
-    /* NAV */
     nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(245,240,230,0.88);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid rgba(139,115,85,0.16);box-shadow:0 2px 18px rgba(90,70,30,0.08);z-index:200;display:flex;align-items:center;padding:0 2.8rem;}
     .nav-brand{font-family:'Playfair Display',Georgia,serif;font-size:1.12rem;font-weight:400;letter-spacing:.06em;color:var(--ink);cursor:pointer;margin-right:auto;transition:color var(--dur) var(--ease);}
     .nav-brand b{color:var(--accent);font-weight:400;}
@@ -46,13 +50,11 @@
     .nav-links button.active{color:var(--accent);background:var(--accent-pale);}
     .nav-links button.active::after{transform:scaleX(1);}
 
-    /* PAGES */
     .page-wrap{padding-top:var(--nav-h);}
     section{display:none;opacity:0;transform:translateY(12px);transition:opacity .55s var(--ease),transform .55s var(--ease);}
     section.active{display:flex;flex-direction:column;align-items:center;}
     section.visible{opacity:1;transform:translateY(0);}
 
-    /* HOME */
     #home{min-height:calc(100vh - var(--nav-h));justify-content:center;text-align:center;padding:5rem 2rem 4rem;position:relative;z-index:2;}
     #home>*{opacity:0;transform:translateY(16px);animation:up .7s var(--ease) forwards;}
     #home>*:nth-child(1){animation-delay:.06s}#home>*:nth-child(2){animation-delay:.16s}#home>*:nth-child(3){animation-delay:.26s}#home>*:nth-child(4){animation-delay:.36s}#home>*:nth-child(5){animation-delay:.46s}
@@ -72,7 +74,6 @@
     .s-title{font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.03em;}
     .s-title b{color:var(--accent);font-weight:400;}
 
-    /* IMPORTAR */
     #importar{min-height:calc(100vh - var(--nav-h));padding:4rem 2rem 5rem;position:relative;z-index:2;}
     .import-card{background:rgba(255,252,245,.88);border:1px solid rgba(139,115,85,.2);border-radius:10px;box-shadow:var(--shadow-md);padding:2.6rem 3rem;width:100%;max-width:680px;display:flex;flex-direction:column;gap:1.7rem;}
     .drop{border:2px dashed rgba(139,115,85,.32);border-radius:7px;padding:2.2rem 1.5rem;text-align:center;cursor:pointer;position:relative;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease);}
@@ -82,16 +83,13 @@
     .drop-lbl{font-family:'Times New Roman',serif;font-size:.95rem;color:var(--ink-light);line-height:1.65;}
     .drop-lbl strong{color:var(--accent);font-weight:normal;}
     .drop-name{margin-top:.7rem;font-size:.84rem;color:var(--accent);font-style:italic;min-height:1.2em;}
-
     .viewer-wrap{border-radius:7px;overflow:hidden;border:1px solid rgba(139,115,85,.16);box-shadow:var(--shadow-sm);background:#16140f;position:relative;height:0;transition:height .5s var(--ease),opacity .5s var(--ease);opacity:0;}
     .viewer-wrap.open{height:270px;opacity:1;}
     .viewer-wrap canvas{display:block;width:100%!important;height:270px!important;}
     .spinner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-family:'IM Fell English',serif;font-size:.75rem;letter-spacing:.2em;pointer-events:none;}
-
     .upload-progress{height:3px;background:rgba(139,115,85,.15);border-radius:2px;overflow:hidden;display:none;}
     .upload-progress-bar{height:100%;background:var(--accent);width:0%;transition:width .3s ease;border-radius:2px;}
     .upload-progress.show{display:block;}
-
     .fields{display:flex;flex-direction:column;gap:1.25rem;}
     .field{display:flex;flex-direction:column;gap:.38rem;}
     label{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);opacity:.78;}
@@ -103,30 +101,22 @@
     .btn-add:active{transform:translateY(0);}
     .btn-add:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
-    /* DESCARGAR */
     #descargar{min-height:calc(100vh - var(--nav-h));justify-content:center;text-align:center;padding:5rem 2rem;position:relative;z-index:2;}
     .cs-ico{font-size:3.5rem;margin-bottom:1.2rem;opacity:.4;}
     .cs-h{font-family:'Playfair Display',Georgia,serif;font-size:2rem;font-weight:400;margin-bottom:.55rem;}
     .cs-sub{font-family:'Times New Roman',serif;font-size:1rem;color:var(--ink-light);opacity:.6;}
 
-    /* LIBRERÍA */
     #libreria{min-height:calc(100vh - var(--nav-h));padding:4rem 2rem 5rem;position:relative;z-index:2;}
-
-    /* Tabs */
     .lib-tabs{display:flex;gap:.5rem;margin-bottom:2.4rem;background:rgba(139,115,85,.07);border:1px solid rgba(139,115,85,.18);border-radius:8px;padding:.35rem;}
     .lib-tab{flex:1;padding:.55rem 1.2rem;background:none;border:none;cursor:pointer;font-family:'IM Fell English',serif;font-size:.88rem;letter-spacing:.06em;color:var(--ink-light);border-radius:5px;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),box-shadow var(--dur) var(--ease);}
     .lib-tab.active{background:var(--paper);color:var(--accent);box-shadow:var(--shadow-sm);}
     .lib-tab:hover:not(.active){color:var(--ink);}
-
     .lib-empty{margin-top:3rem;text-align:center;opacity:.42;}
     .lib-empty-ico{font-size:3rem;margin-bottom:.9rem;display:block;}
     .lib-empty p{font-family:'Times New Roman',serif;font-size:1rem;color:var(--ink-light);line-height:1.75;}
-
     .lib-loading{margin-top:3rem;text-align:center;font-family:'IM Fell English',serif;font-size:.85rem;letter-spacing:.18em;color:var(--accent);opacity:.6;animation:pulse 1.4s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
-
     .lib-grid{width:100%;max-width:1120px;margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.8rem;}
-
     .m-card{background:rgba(255,252,245,.92);border:1px solid rgba(139,115,85,.17);border-radius:9px;box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow var(--dur) var(--ease),transform var(--dur) var(--ease),border-color var(--dur) var(--ease);animation:cardIn .55s var(--ease) both;}
     .m-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-5px);border-color:rgba(139,115,85,.35);}
     @keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -145,7 +135,6 @@
     .btn-delete{background:none;border:1px solid rgba(180,60,40,.25);color:rgba(180,60,40,.6);font-family:'IM Fell English',serif;font-size:.75rem;letter-spacing:.08em;padding:.3rem .85rem;border-radius:3px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease);}
     .btn-delete:hover{background:rgba(180,60,40,.08);color:rgba(180,60,40,.9);border-color:rgba(180,60,40,.5);}
 
-    /* MODAL */
     .modal-backdrop{position:fixed;inset:0;z-index:400;background:rgba(10,8,4,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .45s var(--ease),backdrop-filter .45s var(--ease);}
     .modal-backdrop.open{background:rgba(10,8,4,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:all;}
     .modal-box{background:var(--paper);border:1px solid rgba(139,115,85,.22);border-radius:12px;box-shadow:var(--shadow-lg);width:min(820px,95vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:scale(.93) translateY(22px);transition:opacity .45s var(--ease),transform .45s var(--ease);}
@@ -159,10 +148,8 @@
     .modal-viewer-wrap canvas{display:block;width:100%!important;height:100%!important;position:absolute;inset:0;}
     .modal-desc{padding:1rem 1.8rem 1.4rem;flex-shrink:0;font-family:'Times New Roman',serif;font-size:.95rem;color:var(--ink-light);line-height:1.7;border-top:1px solid rgba(139,115,85,.1);}
     .modal-desc:empty{display:none;}
-
     .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--paper);font-family:'IM Fell English',serif;font-size:.88rem;letter-spacing:.06em;padding:.7rem 1.8rem;border-radius:4px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;z-index:999;transition:opacity .4s var(--ease),transform .4s var(--ease);white-space:nowrap;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
     ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--paper-dark);}::-webkit-scrollbar-thumb{background:var(--accent-light);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--accent);}
   </style>
 </head>
@@ -179,7 +166,6 @@
 </nav>
 
 <div class="page-wrap">
-  <!-- HOME -->
   <section id="home">
     <p class="home-orn">— ✦ —</p>
     <h1 class="home-title">Projecto <b>Babel</b></h1>
@@ -192,7 +178,6 @@
     <p class="home-foot">Est. MMXXV</p>
   </section>
 
-  <!-- IMPORTAR -->
   <section id="importar">
     <div class="s-head"><p class="s-eye">Archivo digital</p><h2 class="s-title">Importar <b>Pieza</b></h2></div>
     <div class="import-card">
@@ -215,34 +200,29 @@
     </div>
   </section>
 
-  <!-- DESCARGAR -->
   <section id="descargar">
     <span class="cs-ico">⬡</span><h2 class="cs-h">Próximamente</h2>
     <p class="cs-sub">La sección de descarga estará disponible en una versión futura.</p>
   </section>
 
-  <!-- LIBRERÍA -->
   <section id="libreria">
     <div class="s-head">
       <p class="s-eye">Colección global</p>
       <h2 class="s-title">Librería <b>Babel</b></h2>
     </div>
-
     <div class="lib-tabs" id="libTabs">
       <button class="lib-tab active" data-tab="public">🌐 &nbsp;Librería pública</button>
       <button class="lib-tab"        data-tab="mine">✦ &nbsp;Mis modelos</button>
     </div>
-
     <div id="libLoading" class="lib-loading">cargando colección…</div>
     <div class="lib-empty" id="libEmpty" style="display:none">
       <span class="lib-empty-ico">⬡</span>
-      <p id="libEmptyMsg">Aún no hay piezas en la librería.</p>
+      <p id="libEmptyMsg">Aún no hay piezas.</p>
     </div>
     <div class="lib-grid" id="libGrid"></div>
   </section>
 </div>
 
-<!-- MODAL -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
     <div class="modal-header">
@@ -258,90 +238,60 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Init Supabase before the module script -->
+<script>
+  const SUPA_URL = 'https://sqqeucxuupmcdjogynup.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxcWV1Y3h1dXBtY2Rqb2d5bnVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzEwNTMsImV4cCI6MjA5Mzc0NzA1M30.UshXuYscATfXQdR4nTR3ZadKsoaEeNigQ4ZkludYv2M';
+  window._sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  function getUserKey() {
+    let k = localStorage.getItem('babel_user_key');
+    if (!k) { k = crypto.randomUUID(); localStorage.setItem('babel_user_key', k); }
+    return k;
+  }
+  window._userKey = getUserKey();
+</script>
+
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-/* ── Supabase config ─────────────────────────────────────── */
-const SUPA_URL = 'https://sqqeucxuupmcdjogynup.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxcWV1Y3h1dXBtY2Rqb2d5bnVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzEwNTMsImV4cCI6MjA5Mzc0NzA1M30.UshXuYscATfXQdR4nTR3ZadKsoaEeNigQ4ZkludYv2M';
+const sb      = window._sb;
+const USER_KEY = window._userKey;
 const BUCKET  = 'models';
-
-const supa = {
-  headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
-
-  async query(path, opts={}) {
-    const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: this.headers, ...opts });
-    if (!r.ok) throw new Error(await r.text());
-    return r.status === 204 ? null : r.json();
-  },
-
-  async uploadFile(path, file, onProgress) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`);
-      xhr.setRequestHeader('apikey', SUPA_KEY);
-      xhr.setRequestHeader('Authorization', `Bearer ${SUPA_KEY}`);
-      xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress(e.loaded/e.total); };
-      xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(xhr.responseText));
-      xhr.onerror = () => reject(new Error('Network error'));
-      xhr.send(file);
-    });
-  },
-
-  fileURL(path) {
-    return `${SUPA_URL}/storage/v1/object/public/${BUCKET}/${path}`;
-  },
-
-  async deleteFile(path) {
-    const r = await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
-    });
-    return r.ok;
-  }
-};
-
-/* ── User identity (persistent anonymous key) ────────────── */
-function getUserKey() {
-  let k = localStorage.getItem('babel_user_key');
-  if (!k) { k = crypto.randomUUID(); localStorage.setItem('babel_user_key', k); }
-  return k;
-}
-const USER_KEY = getUserKey();
 
 /* ── Viewer3D ────────────────────────────────────────────── */
 class Viewer3D {
   constructor(wrap) {
-    this.wrap = wrap; this._raf = null;
-    const w = wrap.clientWidth||600, h = wrap.clientHeight||270;
-    this.renderer = new THREE.WebGLRenderer({ antialias:true });
+    this.wrap=wrap; this._raf=null;
+    const w=wrap.clientWidth||600, h=wrap.clientHeight||270;
+    this.renderer=new THREE.WebGLRenderer({antialias:true});
     this.renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     this.renderer.setSize(w,h);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.outputColorSpace=THREE.SRGBColorSpace;
+    this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure=1.1;
     wrap.appendChild(this.renderer.domElement);
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x16140f);
-    this.camera = new THREE.PerspectiveCamera(45,w/h,0.001,2000);
+    this.scene=new THREE.Scene();
+    this.scene.background=new THREE.Color(0x16140f);
+    this.camera=new THREE.PerspectiveCamera(45,w/h,0.001,2000);
     this.camera.position.set(0,1,3);
     this.scene.add(new THREE.AmbientLight(0xfff8f0,1.2));
     const d=new THREE.DirectionalLight(0xfff4e0,2.5); d.position.set(4,8,5); this.scene.add(d);
     const f=new THREE.DirectionalLight(0xb0a090,0.8); f.position.set(-4,2,-4); this.scene.add(f);
-    this.controls = new OrbitControls(this.camera,this.renderer.domElement);
+    this.controls=new OrbitControls(this.camera,this.renderer.domElement);
     this.controls.enableDamping=true; this.controls.dampingFactor=0.07;
     this.controls.autoRotate=true; this.controls.autoRotateSpeed=1.5;
     this._loop();
   }
-  _loop(){ this._raf=requestAnimationFrame(()=>this._loop()); this.controls.update(); this.renderer.render(this.scene,this.camera); }
+  _loop(){this._raf=requestAnimationFrame(()=>this._loop());this.controls.update();this.renderer.render(this.scene,this.camera);}
   load(url,onDone){
     if(this._model){this.scene.remove(this._model);this._model=null;}
     new GLTFLoader().load(url,gltf=>{
       this._model=gltf.scene;
       const box=new THREE.Box3().setFromObject(this._model);
-      const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3());
+      const c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());
       const sc=2.2/Math.max(s.x,s.y,s.z);
       this._model.scale.setScalar(sc);
       this._model.position.sub(c.multiplyScalar(sc));
@@ -349,16 +299,15 @@ class Viewer3D {
       this.camera.position.set(0,0.4,3.2);
       this.controls.target.set(0,0,0); this.controls.update();
       if(onDone)onDone();
-    },undefined,err=>console.error(err));
+    },undefined,e=>console.error(e));
   }
-  resize(){ const w=this.wrap.clientWidth,h=this.wrap.clientHeight; if(!w||!h)return; this.camera.aspect=w/h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w,h); }
-  snap(){ this.renderer.render(this.scene,this.camera); return this.renderer.domElement.toDataURL('image/jpeg',.88); }
-  destroy(){ cancelAnimationFrame(this._raf); this.renderer.dispose(); this.renderer.domElement.remove(); }
+  resize(){const w=this.wrap.clientWidth,h=this.wrap.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);}
+  snap(){this.renderer.render(this.scene,this.camera);return this.renderer.domElement.toDataURL('image/jpeg',.88);}
+  destroy(){cancelAnimationFrame(this._raf);this.renderer.dispose();this.renderer.domElement.remove();}
 }
 
 /* ── State ───────────────────────────────────────────────── */
-let importV=null, modalV=null, curFile=null, curURL=null;
-let activeTab='public';
+let importV=null, modalV=null, curFile=null, curURL=null, activeTab='public';
 
 /* ── Nav ─────────────────────────────────────────────────── */
 function goTo(id){
@@ -376,48 +325,43 @@ function goTo(id){
 document.querySelectorAll('.nav-links button').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.page)));
 document.getElementById('nb-brand').addEventListener('click',()=>goTo('home'));
 
-/* ── Library tabs ────────────────────────────────────────── */
-document.getElementById('libTabs').addEventListener('click', e=>{
-  const btn = e.target.closest('.lib-tab');
-  if(!btn) return;
+/* ── Tabs ────────────────────────────────────────────────── */
+document.getElementById('libTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.lib-tab'); if(!btn)return;
   document.querySelectorAll('.lib-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  activeTab = btn.dataset.tab;
+  btn.classList.add('active'); activeTab=btn.dataset.tab;
   loadLibrary();
 });
 
-/* ── Load library from Supabase ──────────────────────────── */
+/* ── Load library ────────────────────────────────────────── */
 async function loadLibrary(){
-  const grid  = document.getElementById('libGrid');
-  const empty = document.getElementById('libEmpty');
-  const loading = document.getElementById('libLoading');
-
+  const grid=document.getElementById('libGrid');
+  const empty=document.getElementById('libEmpty');
+  const loading=document.getElementById('libLoading');
   grid.innerHTML=''; empty.style.display='none'; loading.style.display='block';
 
   try {
-    let url = `models?select=*&order=created_at.desc`;
-    if(activeTab==='mine') url += `&user_key=eq.${encodeURIComponent(USER_KEY)}`;
+    let q = sb.from('models').select('*').order('created_at',{ascending:false});
+    if(activeTab==='mine') q=q.eq('user_key',USER_KEY);
+    const {data,error}=await q;
+    if(error) throw error;
 
-    const rows = await supa.query(url, { headers: { ...supa.headers, 'Accept':'application/json' }});
     loading.style.display='none';
-
-    if(!rows||!rows.length){
+    if(!data||!data.length){
       empty.style.display='block';
-      document.getElementById('libEmptyMsg').textContent =
-        activeTab==='mine' ? 'Aún no has publicado ningún modelo.' : 'La librería está vacía.';
+      document.getElementById('libEmptyMsg').textContent=
+        activeTab==='mine'?'Aún no has publicado ningún modelo.':'La librería está vacía.';
       return;
     }
 
-    rows.forEach((item,i)=>{
-      const isMine = item.user_key === USER_KEY;
-      const card = document.createElement('div');
+    data.forEach((item,i)=>{
+      const isMine=item.user_key===USER_KEY;
+      const card=document.createElement('div');
       card.className='m-card'; card.style.animationDelay=(i*.06)+'s';
-      const date = new Date(item.created_at).toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+      const date=new Date(item.created_at).toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
       card.innerHTML=`
-        <div class="m-thumb" data-url="${esc(item.glb_url)}">
-          ${item.thumb_url
-            ? `<img src="${esc(item.thumb_url)}" alt="${esc(item.title)}">`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.15);font-size:2.5rem;">⬡</div>`}
+        <div class="m-thumb">
+          ${item.thumb_url?`<img src="${esc(item.thumb_url)}" alt="${esc(item.title)}">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.15);font-size:2.5rem;">⬡</div>`}
           <div class="m-thumb-overlay"><span>Visualizar ↗</span></div>
         </div>
         <div class="m-body">
@@ -426,59 +370,65 @@ async function loadLibrary(){
           ${item.description?`<p class="m-desc">${esc(item.description)}</p>`:''}
           <p class="m-date">${date}</p>
         </div>
-        ${isMine?`<div class="m-footer"><button class="btn-delete" data-id="${item.id}" data-path="${esc(item.glb_url.split('/models/')[1]||'')}">Eliminar</button></div>`:''}`;
+        ${isMine?`<div class="m-footer"><button class="btn-delete">Eliminar</button></div>`:''}`;
 
       card.querySelector('.m-thumb').addEventListener('click',()=>openModal(item));
       if(isMine){
-        card.querySelector('.btn-delete').addEventListener('click', e=>{
-          e.stopPropagation();
-          deleteModel(item.id, item.glb_url.split('/models/')[1]||'', card);
+        card.querySelector('.btn-delete').addEventListener('click',e=>{
+          e.stopPropagation(); deleteModel(item,card);
         });
       }
       grid.appendChild(card);
     });
-  } catch(err) {
+  } catch(err){
     loading.style.display='none';
-    showToast('Error cargando la librería');
+    showToast('Error: '+err.message);
     console.error(err);
   }
 }
 
-/* ── Delete model ────────────────────────────────────────── */
-async function deleteModel(id, storagePath, cardEl){
-  if(!confirm('¿Eliminar esta pieza de la librería?')) return;
+/* ── Delete ──────────────────────────────────────────────── */
+async function deleteModel(item,cardEl){
+  if(!confirm('¿Eliminar esta pieza?')) return;
   try {
-    await supa.query(`models?id=eq.${id}`, { method:'DELETE', headers:{...supa.headers,'Prefer':'return=minimal'} });
-    if(storagePath) await supa.deleteFile(storagePath);
-    cardEl.style.transition='opacity .4s, transform .4s';
+    const {error}=await sb.from('models').delete().eq('id',item.id);
+    if(error) throw error;
+    // Delete files from storage
+    const glbPath = item.glb_url.split('/object/public/'+BUCKET+'/')[1];
+    if(glbPath) await sb.storage.from(BUCKET).remove([glbPath]);
+    if(item.thumb_url){
+      const tPath=item.thumb_url.split('/object/public/'+BUCKET+'/')[1];
+      if(tPath) await sb.storage.from(BUCKET).remove([tPath]);
+    }
+    cardEl.style.transition='opacity .4s,transform .4s';
     cardEl.style.opacity='0'; cardEl.style.transform='scale(.95)';
-    setTimeout(()=>cardEl.remove(), 420);
+    setTimeout(()=>cardEl.remove(),420);
     showToast('Pieza eliminada');
-  } catch(err){ showToast('Error al eliminar'); console.error(err); }
+  } catch(err){ showToast('Error al eliminar: '+err.message); console.error(err); }
 }
 
-/* ── Drop / file pick ────────────────────────────────────── */
-const dropEl   = document.getElementById('drop');
-const fileIn   = document.getElementById('fileIn');
-const dropName = document.getElementById('dropName');
-const importWrap= document.getElementById('importWrap');
-const importSpin= document.getElementById('importSpinner');
+/* ── Drop / pick ─────────────────────────────────────────── */
+const dropEl   =document.getElementById('drop');
+const fileIn   =document.getElementById('fileIn');
+const dropName =document.getElementById('dropName');
+const importWrap=document.getElementById('importWrap');
+const importSpin=document.getElementById('importSpinner');
 
-fileIn.addEventListener('change',e=>{ if(e.target.files[0]) pick(e.target.files[0]); });
+fileIn.addEventListener('change',e=>{if(e.target.files[0])pick(e.target.files[0]);});
 dropEl.addEventListener('dragover',e=>{e.preventDefault();dropEl.classList.add('over');});
 dropEl.addEventListener('dragleave',()=>dropEl.classList.remove('over'));
 dropEl.addEventListener('drop',e=>{
-  e.preventDefault(); dropEl.classList.remove('over');
-  const f=e.dataTransfer.files[0]; if(f) pick(f); else showToast('Archivo no válido');
+  e.preventDefault();dropEl.classList.remove('over');
+  const f=e.dataTransfer.files[0]; if(f)pick(f); else showToast('Archivo no válido');
 });
 
 function pick(f){
   curFile=f;
-  if(curURL) URL.revokeObjectURL(curURL);
+  if(curURL)URL.revokeObjectURL(curURL);
   curURL=URL.createObjectURL(f);
   dropName.textContent=f.name;
   const t=document.getElementById('iTitle');
-  if(!t.value) t.value=f.name.replace(/\.(glb|gltf)$/i,'').replace(/[-_]/g,' ');
+  if(!t.value)t.value=f.name.replace(/\.(glb|gltf)$/i,'').replace(/[-_]/g,' ');
   importWrap.classList.add('open'); importSpin.style.display='flex';
   if(importV){importV.destroy();importV=null;}
   setTimeout(()=>{
@@ -488,57 +438,67 @@ function pick(f){
 }
 
 /* ── Publish ─────────────────────────────────────────────── */
-document.getElementById('btnAdd').addEventListener('click', async ()=>{
-  const title  = document.getElementById('iTitle').value.trim();
-  const author = document.getElementById('iAuthor').value.trim();
-  const desc   = document.getElementById('iDesc').value.trim();
-  if(!curFile)  {showToast('Primero selecciona un archivo .glb');return;}
-  if(!title)    {showToast('Añade un título a la pieza');return;}
-  if(!author)   {showToast('Añade el nombre del autor');return;}
+document.getElementById('btnAdd').addEventListener('click',async()=>{
+  const title =document.getElementById('iTitle').value.trim();
+  const author=document.getElementById('iAuthor').value.trim();
+  const desc  =document.getElementById('iDesc').value.trim();
+  if(!curFile){showToast('Primero selecciona un archivo .glb');return;}
+  if(!title)  {showToast('Añade un título a la pieza');return;}
+  if(!author) {showToast('Añade el nombre del autor');return;}
 
-  const btn = document.getElementById('btnAdd');
+  const btn=document.getElementById('btnAdd');
   btn.disabled=true; btn.textContent='Publicando…';
-
-  const prog = document.getElementById('uploadProgress');
-  const bar  = document.getElementById('uploadBar');
-  prog.classList.add('show'); bar.style.width='0%';
+  const prog=document.getElementById('uploadProgress');
+  const bar =document.getElementById('uploadBar');
+  prog.classList.add('show'); bar.style.width='5%';
 
   try {
-    // 1 — Capture thumbnail as blob
-    let thumbURL = null;
+    // 1 — Upload thumbnail
+    let thumbURL=null;
     if(importV){
-      const dataURL = importV.snap();
-      const thumbBlob = await (await fetch(dataURL)).blob();
-      const thumbPath = `thumbs/${USER_KEY}_${Date.now()}.jpg`;
-      await supa.uploadFile(thumbPath, thumbBlob, ()=>{});
-      thumbURL = supa.fileURL(thumbPath);
+      const dataURL=importV.snap();
+      const thumbBlob=await(await fetch(dataURL)).blob();
+      const thumbPath=`thumbs/${USER_KEY}_${Date.now()}.jpg`;
+      const {error:te}=await sb.storage.from(BUCKET).upload(thumbPath,thumbBlob,{contentType:'image/jpeg',upsert:true});
+      if(!te){
+        const {data:td}=sb.storage.from(BUCKET).getPublicUrl(thumbPath);
+        thumbURL=td.publicUrl;
+      }
     }
+    bar.style.width='25%';
 
     // 2 — Upload GLB
-    bar.style.width='20%';
-    const glbPath = `${USER_KEY}_${Date.now()}_${curFile.name.replace(/\s+/g,'_')}`;
-    await supa.uploadFile(glbPath, curFile, p=>{ bar.style.width=(20+p*70)+'%'; });
-    const glbURL = supa.fileURL(glbPath);
-    bar.style.width='92%';
+    const glbPath=`${USER_KEY}_${Date.now()}_${curFile.name.replace(/\s+/g,'_')}`;
+    const {error:ge}=await sb.storage.from(BUCKET).upload(glbPath,curFile,{contentType:'model/gltf-binary',upsert:true});
+    if(ge) throw ge;
+    const {data:gd}=sb.storage.from(BUCKET).getPublicUrl(glbPath);
+    bar.style.width='80%';
 
     // 3 — Insert row
-    await supa.query('models', {
-      method:'POST',
-      headers:{...supa.headers,'Prefer':'return=minimal'},
-      body: JSON.stringify({ title, author, description:desc, glb_url:glbURL, thumb_url:thumbURL, user_key:USER_KEY })
+    const {error:ie}=await sb.from('models').insert({
+      title, author, description:desc,
+      glb_url: gd.publicUrl,
+      thumb_url: thumbURL,
+      user_key: USER_KEY
     });
+    if(ie) throw ie;
     bar.style.width='100%';
 
     showToast('✦  Pieza publicada en la Librería Babel');
     resetForm();
-    setTimeout(()=>{ goTo('libreria'); activeTab='public'; document.querySelector('[data-tab=public]').classList.add('active'); document.querySelector('[data-tab=mine]').classList.remove('active'); },900);
+    setTimeout(()=>{
+      goTo('libreria');
+      activeTab='public';
+      document.querySelector('[data-tab=public]').classList.add('active');
+      document.querySelector('[data-tab=mine]').classList.remove('active');
+    },900);
 
   } catch(err){
     showToast('Error al publicar: '+err.message);
     console.error(err);
   } finally {
     btn.disabled=false; btn.innerHTML='✦ &nbsp;Publicar en la Librería';
-    setTimeout(()=>prog.classList.remove('show'),600);
+    setTimeout(()=>prog.classList.remove('show'),700);
   }
 });
 
@@ -553,16 +513,16 @@ function resetForm(){
 }
 
 /* ── Modal ───────────────────────────────────────────────── */
-const backdrop   = document.getElementById('modalBackdrop');
-const modalWrap  = document.getElementById('modalViewerWrap');
-const modalSpin  = document.getElementById('modalSpinner');
+const backdrop  =document.getElementById('modalBackdrop');
+const modalWrap =document.getElementById('modalViewerWrap');
+const modalSpin =document.getElementById('modalSpinner');
 let mOpen=false;
 
 function openModal(item){
   if(mOpen)return;
-  document.getElementById('modalTitle').textContent  = item.title;
-  document.getElementById('modalAuthor').textContent = item.author;
-  document.getElementById('modalDesc').textContent   = item.description||'';
+  document.getElementById('modalTitle').textContent =item.title;
+  document.getElementById('modalAuthor').textContent=item.author;
+  document.getElementById('modalDesc').textContent  =item.description||'';
   backdrop.classList.add('open'); document.body.style.overflow='hidden'; mOpen=true;
   modalSpin.style.display='flex';
   setTimeout(()=>{
@@ -581,12 +541,12 @@ function closeModal(){
 document.getElementById('modalClose').addEventListener('click',closeModal);
 backdrop.addEventListener('click',e=>{if(e.target===backdrop)closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-window.addEventListener('resize',()=>{ if(importV)importV.resize(); if(modalV)modalV.resize(); });
+window.addEventListener('resize',()=>{if(importV)importV.resize();if(modalV)modalV.resize();});
 
 /* ── Toast / util ────────────────────────────────────────── */
 let tTimer;
-function showToast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(tTimer); tTimer=setTimeout(()=>el.classList.remove('show'),3200); }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tTimer);tTimer=setTimeout(()=>el.classList.remove('show'),3200);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 goTo('home');
 </script>
