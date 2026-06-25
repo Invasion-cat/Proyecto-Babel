@@ -131,9 +131,11 @@
     .m-author{font-size:.75rem;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;}
     .m-desc{font-family:'Times New Roman',Times,serif;font-size:.87rem;color:var(--ink-light);line-height:1.62;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:.25rem;}
     .m-date{font-size:.72rem;color:var(--accent-light);letter-spacing:.06em;margin-top:.3rem;opacity:.7;}
-    .m-footer{padding:.6rem 1.3rem .9rem;display:flex;justify-content:flex-end;}
+    .m-footer{padding:.6rem 1.3rem .9rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;}
     .btn-delete{background:none;border:1px solid rgba(180,60,40,.25);color:rgba(180,60,40,.6);font-family:'IM Fell English',serif;font-size:.75rem;letter-spacing:.08em;padding:.3rem .85rem;border-radius:3px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease);}
     .btn-delete:hover{background:rgba(180,60,40,.08);color:rgba(180,60,40,.9);border-color:rgba(180,60,40,.5);}
+    .btn-download{background:none;border:1px solid rgba(139,115,85,.32);color:var(--accent);font-family:'IM Fell English',serif;font-size:.75rem;letter-spacing:.08em;padding:.3rem .85rem;border-radius:3px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease);}
+    .btn-download:hover{background:var(--accent-pale);color:var(--ink);border-color:var(--accent);}
 
     .modal-backdrop{position:fixed;inset:0;z-index:400;background:rgba(10,8,4,0);backdrop-filter:blur(0px);-webkit-backdrop-filter:blur(0px);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .45s var(--ease),backdrop-filter .45s var(--ease);}
     .modal-backdrop.open{background:rgba(10,8,4,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:all;}
@@ -148,6 +150,11 @@
     .modal-viewer-wrap canvas{display:block;width:100%!important;height:100%!important;position:absolute;inset:0;}
     .modal-desc{padding:1rem 1.8rem 1.4rem;flex-shrink:0;font-family:'Times New Roman',serif;font-size:.95rem;color:var(--ink-light);line-height:1.7;border-top:1px solid rgba(139,115,85,.1);}
     .modal-desc:empty{display:none;}
+    .modal-controls{display:flex;align-items:center;gap:.85rem;padding:.7rem 1.8rem;border-top:1px solid rgba(139,115,85,.1);flex-shrink:0;}
+    .mc-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);opacity:.85;white-space:nowrap;}
+    .modal-controls input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:rgba(139,115,85,.28);outline:none;cursor:pointer;}
+    .modal-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--paper);box-shadow:var(--shadow-sm);cursor:pointer;}
+    .modal-controls input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid var(--paper);cursor:pointer;}
     .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--paper);font-family:'IM Fell English',serif;font-size:.88rem;letter-spacing:.06em;padding:.7rem 1.8rem;border-radius:4px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;z-index:999;transition:opacity .4s var(--ease),transform .4s var(--ease);white-space:nowrap;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--paper-dark);}::-webkit-scrollbar-thumb{background:var(--accent-light);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--accent);}
@@ -232,6 +239,10 @@
     <div class="modal-viewer-wrap" id="modalViewerWrap">
       <div class="spinner" id="modalSpinner">cargando modelo…</div>
     </div>
+    <div class="modal-controls">
+      <span class="mc-label">☀ Luz</span>
+      <input type="range" id="modalLight" min="0.4" max="3" step="0.05" value="1.35">
+    </div>
     <p class="modal-desc" id="modalDesc"></p>
   </div>
 </div>
@@ -312,6 +323,7 @@ class Viewer3D {
   }
   resize(){const w=this.wrap.clientWidth,h=this.wrap.clientHeight;if(!w||!h)return;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);}
   snap(){this.renderer.render(this.scene,this.camera);return this.renderer.domElement.toDataURL('image/jpeg',.88);}
+  setExposure(v){this.renderer.toneMappingExposure=v;}
   destroy(){cancelAnimationFrame(this._raf);this.renderer.dispose();this.renderer.domElement.remove();}
 }
 
@@ -379,9 +391,15 @@ async function loadLibrary(){
           ${item.description?`<p class="m-desc">${esc(item.description)}</p>`:''}
           <p class="m-date">${date}</p>
         </div>
-        ${isMine?`<div class="m-footer"><button class="btn-delete">Eliminar</button></div>`:''}`;
+        <div class="m-footer">
+          <button class="btn-download">⇩&nbsp; Descargar</button>
+          ${isMine?`<button class="btn-delete">Eliminar</button>`:''}
+        </div>`;
 
       card.querySelector('.m-thumb').addEventListener('click',()=>openModal(item));
+      card.querySelector('.btn-download').addEventListener('click',e=>{
+        e.stopPropagation(); downloadModel(item);
+      });
       if(isMine){
         card.querySelector('.btn-delete').addEventListener('click',e=>{
           e.stopPropagation(); deleteModel(item,card);
@@ -414,6 +432,22 @@ async function deleteModel(item,cardEl){
     setTimeout(()=>cardEl.remove(),420);
     showToast('Pieza eliminada');
   } catch(err){ showToast('Error al eliminar: '+err.message); console.error(err); }
+}
+
+/* ── Download ────────────────────────────────────────────── */
+async function downloadModel(item){
+  try {
+    showToast('Descargando…');
+    const res=await fetch(item.glb_url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const safe=String(item.title||'modelo').trim().replace(/[^\w\-]+/g,'_')||'modelo';
+    a.href=url; a.download=safe+'.glb';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  } catch(err){ showToast('Error al descargar: '+err.message); console.error(err); }
 }
 
 /* ── Drop / pick ─────────────────────────────────────────── */
@@ -525,7 +559,11 @@ function resetForm(){
 const backdrop  =document.getElementById('modalBackdrop');
 const modalWrap =document.getElementById('modalViewerWrap');
 const modalSpin =document.getElementById('modalSpinner');
+const modalLight=document.getElementById('modalLight');
 let mOpen=false;
+
+// Slider de luminosidad: ajusta la exposicion del visor en vivo.
+modalLight.addEventListener('input',()=>{ if(modalV) modalV.setExposure(parseFloat(modalLight.value)); });
 
 function openModal(item){
   if(mOpen)return;
@@ -537,6 +575,7 @@ function openModal(item){
   setTimeout(()=>{
     if(modalV){modalV.destroy();modalV=null;}
     modalV=new Viewer3D(modalWrap);
+    modalV.setExposure(parseFloat(modalLight.value));
     modalV.load(item.glb_url,()=>{modalSpin.style.display='none';});
   },460);
 }
